@@ -1,0 +1,24 @@
+{
+  "name": "alexbusu/monolog-formatters",
+  "description": "Custom formatters for Monolog logger for PHP.",
+  "keywords": [
+    "logging",
+    "formatters"
+  ],
+  "type": "library",
+  "require": {
+    "monolog/monolog": "^1 || ^2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Alexbusu\\Monolog\\Formatter\\": "src/Formatter"
+    }
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Alexandru Busuioc",
+      "email": "busuioc.alexandru@gmail.com"
+    }
+  ]
+}
