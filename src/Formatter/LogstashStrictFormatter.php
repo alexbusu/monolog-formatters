@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Alexbusu\Monolog\Formatter;
 
@@ -8,8 +8,11 @@ class LogstashStrictFormatter extends LogstashFormatter
 {
     public function format(array $record): string
     {
-        if (array_key_exists('channel', $record) && 'doctrine' === $record['channel']) {
-            // The `context` key should contain a map of ["string" => "mixed"] pairs, resulting in a JSON object.
+        if (
+            array_key_exists('channel', $record)
+            && 'doctrine' === $record['channel']
+        ) {
+            // The `context` key would contain a map of ["string" => "mixed"] pairs, resulting in a JSON object.
             // Doctrine component puts the bind list values in `context`, thus resulting in a JSON array;
             //  This results in map setting conflicts in the Elasticsearch's index.
             if (array_key_exists('context', $record)) {
@@ -18,6 +21,7 @@ class LogstashStrictFormatter extends LogstashFormatter
         }
         if (
             array_key_exists('extra', $record)
+            && is_array($record['extra'])
             && array_key_exists('token', $record['extra'])
             && is_null($record['extra']['token'])
         ) {
