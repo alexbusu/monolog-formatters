@@ -8,7 +8,7 @@ class LogstashStrictFormatter extends LogstashFormatter
 {
     public function format(array $record): string
     {
-        return (string)parent::format($this->sanitizeData($record));
+        return parent::format($this->sanitizeData($record));
     }
 
     protected function sanitizeData(array $record): array
