@@ -8,6 +8,11 @@ class LogstashStrictFormatter extends LogstashFormatter
 {
     public function format(array $record): string
     {
+        return parent::format($this->sanitizeData($record));
+    }
+
+    protected function sanitizeData(array $record): array
+    {
         if (
             array_key_exists('channel', $record)
             && 'doctrine' === $record['channel']
@@ -30,6 +35,6 @@ class LogstashStrictFormatter extends LogstashFormatter
             //  it's null.
             unset($record['extra']['token']);
         }
-        return parent::format($record);
+        return $record;
     }
 }

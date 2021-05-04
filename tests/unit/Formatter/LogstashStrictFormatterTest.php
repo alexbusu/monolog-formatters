@@ -4,6 +4,7 @@ namespace Tests\Alexbusu\Monolog\Formatter;
 
 use Alexbusu\Monolog\Formatter\LogstashStrictFormatter;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LogLevel;
 
 class LogstashStrictFormatterTest extends TestCase
 {
@@ -11,54 +12,59 @@ class LogstashStrictFormatterTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->formatter = new LogstashStrictFormatter('testcase');
+        $this->formatter = new class('testcase') extends LogstashStrictFormatter {
+            public function doSanitizeData(array $record): array
+            {
+                return $this->sanitizeData($record);
+            }
+        };
     }
 
     public function testFormatterForDoctrineContextArgs(): void
     {
-        $record = $this->getLogRecordForDoctrine();
-        $resultRecord = json_decode($this->formatter->format($record), true);
+        $record = $this->getSampleLogRecord();
+        $record['channel'] = 'doctrine';
+        $record['context'] = [
+            'first-placeholder-value',
+            'second-placeholder-value',
+        ];
+        $resultRecord = $this->formatter->doSanitizeData($record);
         self::assertArrayHasKey('context', $resultRecord, 'expected the "context" key in the formatted record');
         self::assertArrayHasKey('binds', $resultRecord['context'], 'expected the "binds" key in the formatted record.context');
     }
 
     public function testFormatterForTokenContextWithMoreExtra(): void
     {
-        $record = $this->getLogRecordForAuthToken();
-        $resultRecord = json_decode($this->formatter->format($record), true);
+        $record = $this->getSampleLogRecord();
+        $record['extra'] = [
+            'token' => null,
+            'something' => 'else',
+        ];
+        $resultRecord = $this->formatter->doSanitizeData($record);
         self::assertArrayHasKey('extra', $resultRecord, 'expected the "extra" key in the formatted record');
         self::assertArrayNotHasKey('token', $resultRecord['extra'], 'expected no "token" key in the formatted record.extra');
     }
 
     public function testFormatterForTokenContextWithNoOtherExtra(): void
     {
-        $record = $this->getLogRecordForAuthToken();
+        $record = $this->getSampleLogRecord();
         $record['extra'] = [
             'token' => null,
         ];
-        $resultRecord = json_decode($this->formatter->format($record), true);
-        self::assertArrayNotHasKey('extra', $resultRecord, 'expected no "extra" key in the formatted record');
+        $resultRecord = $this->formatter->doSanitizeData($record);
+        self::assertArrayHasKey('extra', $resultRecord, 'expected the "extra" key in the formatted record');
+        self::assertArrayNotHasKey('token', $resultRecord['extra'], 'expected no "token" key in the formatted record.extra');
     }
 
-    private function getLogRecordForDoctrine(): array
+    private function getSampleLogRecord(): array
     {
         return [
-            'channel' => 'doctrine',
-            'context' => [
-                'first-placeholder-value',
-                'second-placeholder-value',
-            ],
-        ];
-    }
-
-    private function getLogRecordForAuthToken(): array
-    {
-        return [
-            'channel' => 'auth',
-            'extra' => [
-                'token' => null,
-                'something' => 'else',
-            ],
+            'datetime' => gmdate('c'),
+            'message' => 'message',
+            'channel' => 'cli',
+            'level' => LogLevel::DEBUG,
+            'extra' => [],
+            'context' => [],
         ];
     }
 }
