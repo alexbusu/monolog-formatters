@@ -14,14 +14,6 @@ class LogstashStrictFormatterTest extends TestCase
     protected function setUp(): void
     {
         $this->formatter = new class('testcase') extends LogstashStrictFormatter {
-            public $formatWasCalled = false;
-
-            public function format(array $record): string
-            {
-                $this->formatWasCalled = true;
-                return '';
-            }
-
             public function doSanitizeData(array $record): array
             {
                 return $this->sanitizeData($record);
